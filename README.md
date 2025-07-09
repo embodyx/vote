@@ -101,6 +101,25 @@ pip install mediapy pandas
 pip install gymnasium==0.28.1
 ```
 
+### Results
+
+Evaluation results on the WidowX robot in the SimplerEnv Visual Matching setting. 
+
+| Method                  | Put Spoon | Put Carrot | Stack Block | Put Eggplant | Avg. | Latency (ms) ↓ | Speed up ↑ |
+|-------------------------|-----------|------------|--------------|---------------|------|----------------|-------------|
+| RT-1-X                  | 0.0       | 4.2        | 0.0          | 0.0           | 1.1  | --             | --          |
+| Octo-Base               | 12.5      | 8.3        | 0.0          | 43.1          | 16.0 | --             | --          |
+| Octo-Small              | 47.2      | 9.7        | 4.2          | 56.9          | 30.0 | --             | --          |
+| OpenVLA                 | 0.0       | 0.0        | 0.0          | 4.1           | 1.0  | 240            | 1.00        |
+| RoboVLM (zero-shot)     | 20.8      | 25.0       | 8.3          | 0.0           | 13.5 | --             | --          |
+| RoboVLM (fine-tuned)    | 29.2      | 25.0       | 12.5         | 58.3          | 31.3 | --             | --          |
+| Openpi0                 | 29.1      | 0.0        | 16.6         | 62.5          | 27.1 | 470            | 0.50        |
+| SpatialVLA (zero-shot)  | 20.8      | 20.8       | 25.0         | 70.8          | 34.4 | 400            | 0.60        |
+| SpatialVLA (fine-tuned) | 16.7      | 25.0       | 29.2         | 100.0         | 42.7 | 400            | 0.60        |
+| CogACT                  | 71.7      | 50.8       | 15.0         | 67.5          | 51.3 | 220            | 1.09        |
+| **Ours**                | 54.2      | 25.0       | **45.8**     | **91.7**      | **54.2** | **78**      | **3.07**    |
+
+
 # TODO
 
 - [ ] Upload all LIBERO checkpoints  
