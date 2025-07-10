@@ -29,3 +29,9 @@ python experiments/robot/libero/run_libero_eval.py \
     --num_actions_chunk 8 \
     --num_actions_per_token 8
 ```
+
+Chunk16 with two tokens, use:
+```bash
+    --num_actions_chunk 16 \
+    --num_actions_per_token 8
+```
