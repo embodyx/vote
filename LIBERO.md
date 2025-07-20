@@ -1,7 +1,7 @@
 
 # Libero Evaluation
 
-## Libero Environment
+## Environment
 ```bash
 cd ~/ 
 git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
@@ -15,7 +15,7 @@ cd ~/vote
 pip install -r experiments/robot/libero/libero_requirements.txt 
 ```
 
-## Libero Evaluation
+## Evaluation
 
 ```bash
 cd ~/vote/
@@ -34,4 +34,13 @@ Chunk16 with two tokens, use:
 ```bash
     --num_actions_chunk 16 \
     --num_actions_per_token 8
+```
+
+
+## Training
+
+Dataset
+
+```
+git clone git@hf.co:datasets/openvla/modified_libero_rlds
 ```

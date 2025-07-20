@@ -4,8 +4,7 @@ import math
 from diffusers import DDIMScheduler
 import torch
 import torch.nn as nn
-from prismatic.vla.constants import ACTION_DIM, ACTION_TOKEN_BEGIN_IDX, IGNORE_INDEX, NUM_ACTIONS_CHUNK, PROPRIO_DIM, STOP_INDEX
-from transformers import ViTModel, ViTConfig
+from prismatic.vla.constants import ACTION_DIM,  IGNORE_INDEX, NUM_ACTIONS_CHUNK
 
 # original oft head
 class L1RegressionActionHead(nn.Module):
@@ -42,7 +41,7 @@ class MLPResNetBlock(nn.Module):
             nn.LayerNorm(dim),
             nn.Linear(dim, dim),
             # nn.ReLU(),
-            nn.SiLU(), # 视觉任务表现较好. 
+            nn.SiLU(), 
         )
 
     def forward(self, x):
@@ -110,132 +109,6 @@ class L1RegressionActionHeadmulmlpk(nn.Module):
         action = self.model(actions_hidden_states) # output shape: (batch_size, num of tokens, action_dim*num_actions_per_token)
         action = action.reshape(batch_size, self.num_actions_chunk, self.action_dim)
         return action 
-
-class MLPResNetBlockV2(nn.Module):
-    def __init__(self, dim, expansion=4, dropout=0.1):
-        super().__init__()
-        self.ffn = nn.Sequential(
-            nn.LayerNorm(dim),
-            nn.Linear(dim, dim * expansion),
-            nn.SiLU(),
-            nn.Linear(dim * expansion, dim)
-        )
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, x):
-        identity = x
-        x_ffn = self.ffn(x)
-        x_dropped = self.dropout(x_ffn)
-        x = x_dropped + identity
-        return x
-
-class L1RegressionActionHeadFunnel(nn.Module):
-    def __init__(self,
-                 input_dim: int,
-                 hidden_dim: int,
-                 action_dim: int,
-                 num_actions_chunk: int,
-                 num_actions_per_token: int,
-                 num_blocks: int,
-                 expansion: int = 4,
-                 dropout: float = 0.1):
-        super().__init__()
-        self.action_dim = action_dim
-        self.num_actions_chunk = num_actions_chunk
-        self.num_actions_per_token = num_actions_per_token
-
-        # 1. 输入投射层
-        self.input_proj = nn.Sequential(
-            nn.LayerNorm(input_dim),
-            nn.Linear(input_dim, hidden_dim),
-            nn.SiLU(),
-        )
-
-        # 2. ResNet 主体
-        self.resnet_body = nn.ModuleList()
-        for _ in range(num_blocks):
-            self.resnet_body.append(
-                MLPResNetBlockV2(dim=hidden_dim, expansion=expansion, dropout=dropout)
-            )
-
-        # 3. 输出头
-        self.output_head = nn.Sequential(
-            nn.LayerNorm(hidden_dim),
-            nn.Linear(hidden_dim, action_dim*num_actions_per_token)
-        )
-
-    def predict_action(self, actions_hidden_states: torch.Tensor):
-        """
-        Predict actions using funnel MLP design.
-        
-        Args:
-            actions_hidden_states: (batch_size, num_tokens, input_dim)
-        Returns:
-            action: (batch_size, num_actions_chunk, action_dim)
-        """
-        batch_size = actions_hidden_states.shape[0]
-        
-        # action = self.model(actions_hidden_states)  # (batch_size, num_tokens, action_dim*num_actions_per_token)
-        
-        # Apply input projection
-        x = self.input_proj(actions_hidden_states)
-        
-        # Apply ResNet blocks
-        for block in self.resnet_body:
-            x = block(x)
-        
-        # Apply output head
-        action = self.output_head(x)  # (batch_size, num_tokens, action_dim*num_actions_per_token)
-        
-        # Reshape to final output
-        action = action.reshape(batch_size, self.num_actions_chunk, self.action_dim)
-        return action
-
-
-class ViTActionHead(nn.Module):
-    def __init__(self, 
-                 pretrained_model_name: str = "timm/deit3_large_patch16_224.fb_in22k_ft_in1k", # base只有 12层, 太小了
-                 input_dim: int = 4096,             # LLM 输出维度
-                 vit_hidden_dim: int = 768,         
-                 action_dim: int = 7,
-                 num_actions_chunk: int = 16,
-                 num_actions_per_token: int = 16):
-        super().__init__()
-        self.input_dim = input_dim
-        self.vit_hidden_dim = vit_hidden_dim
-        self.action_dim = action_dim
-        self.num_actions_chunk = num_actions_chunk
-        self.num_actions_per_token = num_actions_per_token
-        
-        self.pre_proj = nn.Linear(input_dim, vit_hidden_dim)# Linear projection: LLM 4096 → ViT 768
-
-        vit_config = ViTConfig.from_pretrained(pretrained_model_name)
-        vit_config.hidden_size = vit_hidden_dim
-        vit_config.num_channels = 1
-        vit_config.image_size = 1
-        vit_config.patch_size = 1
-
-        self.encoder = ViTModel(vit_config).encoder
-        self.pos_embedding = nn.Parameter(torch.zeros(1, num_actions_chunk, vit_hidden_dim))# 位置编码（可训练）
-        self.action_proj = nn.Linear(vit_hidden_dim, action_dim*num_actions_per_token)# 输出 head: 768 → action_dim
-        
-
-    def predict_action(self, x:torch.Tensor):
-        if x.ndim == 2:
-            B, D = x.shape
-            num_tokens = 1
-            x = x.unsqueeze(1)# [B, 1, D]#x中间插入一个维度
-        else:
-            B, num_tokens, hidden_dim = x.shape # prepare for future multiple tokens' hidden states
-            assert hidden_dim == self.input_dim, f"Expected D={self.input_dim}, got {hidden_dim}"
-        
-        x = self.pre_proj(x)                  # [B, T, vit_hidden_dim]
-        x = x + self.pos_embedding[:, :num_tokens, :]  # 加位置编码
-        x = self.encoder(x)[0]                # [B, T, vit_hidden_dim]
-        x = self.action_proj(x)               # [B, T, action_dim]
-        action = x.reshape(B, self.num_actions_chunk, self.action_dim)# 训练的时候就是16个一起, 所以不能和训练的chunk token不一样.  
-        return action
-
 
 
 ## diffusion 用到的. 

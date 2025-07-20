@@ -53,6 +53,25 @@ pip install -r experiments/robot/libero/libero_requirements.txt
 
 We have speed measurement codes under `experiments/speed/`. 
 
+# Training
+
+## Training Setting
+
+- **LIBERO**: NVIDIA RTX A6000 GPUs (48 GB VRAM each), 256 GB system RAM, shuffle buffer of 60K samples. Global batch size 40. Training converges in under 24 hours.
+- **Fractal**: NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 144. Training converges in under 24 hours.
+- **Bridge**: NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 96. Training converges in under 24 hours.
+
+
+## Steps
+
+Dataset follows: [rlds_dataset_mod](https://github.com/kpertsch/rlds_dataset_mod)
+
+Then run train script:
+```
+bash train.sh
+```
+
+
 ### Q&A
 
 For libero, read `LIBERO.md` carefully.
@@ -69,7 +88,7 @@ If you run into any issues, please open a new GitHub issue.
 
 
 
-### SimplerEnv
+# SimplerEnv
 For SimplerEnv installation:
 
 You may install SimplerEnv before you install effvla.
