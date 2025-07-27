@@ -34,21 +34,6 @@ cd experiments/speed/
 python effvla.py
 ```
 
-
-### Libero Environment
-```bash
-cd ~/  
-git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
-cd LIBERO
-pip install -e .
-```
-
-then install libero requirement.
-```bash
-cd ~/vote
-pip install -r experiments/robot/libero/libero_requirements.txt 
-```
-
 ### Speed
 
 We have speed measurement codes under `experiments/speed/`. 
@@ -57,9 +42,9 @@ We have speed measurement codes under `experiments/speed/`.
 
 ## Training Setting
 
-- **LIBERO**: NVIDIA RTX A6000 GPUs (48 GB VRAM each), 256 GB system RAM, shuffle buffer of 60K samples. Global batch size 40. Training converges in under 24 hours.
-- **Fractal**: NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 144. Training converges in under 24 hours.
-- **Bridge**: NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 96. Training converges in under 24 hours.
+- **LIBERO**: 5x NVIDIA RTX A6000 GPUs (48 GB VRAM each), 256 GB system RAM, shuffle buffer of 60K samples. Global batch size 40. Training converges in under 24 hours.
+- **Fractal**: 6x NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 144. Training converges in under 24 hours.
+- **Bridge**: 4x NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 96. Training converges in under 24 hours.
 
 
 ## Steps
@@ -87,8 +72,11 @@ It is because you don't install correctly. Check `pip list | grep effvla`.
 If you run into any issues, please open a new GitHub issue.
 
 
+# Evaluation
 
-# SimplerEnv
+For libero evaluation, follow `LIBERO.md`.
+
+## SimplerEnv
 For SimplerEnv installation:
 
 You may install SimplerEnv before you install effvla.
