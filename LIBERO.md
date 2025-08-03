@@ -1,5 +1,21 @@
-
 # Libero Evaluation
+
+
+## Relevant Files
+
+Evaluation
+* `experiments/robot/libero/`: LIBERO eval files
+    * `run_libero_eval.py`: LIBERO eval script
+    * `libero_utils.py`: LIBERO eval utils
+    * `batch_eval.py`: Multiple-GPU parallel evaluation script
+    * `batch_plot.ipynb`: Plotting script for batch evaluation results
+* `experiments/robot/`: General eval utils files
+    * `openvla_utils.py`: OpenVLA-specific eval utils
+    * `robot_utils.py`: Other eval utils
+
+Training
+* `vla-scripts/finetune.py`: VLA fine-tuning script
+
 
 ## Environment
 ```bash
@@ -17,6 +33,16 @@ pip install -r experiments/robot/libero/libero_requirements.txt
 
 ## Evaluation
 
+
+### Multiple GPU evaluation:
+
+```bash
+python batch_eval.py  --dir /home/user1/workspace/fle4chunk16token2spatial --devices 0 1  --task_suite libero_spatial
+```
+
+The results could be plotted with `batch_plot.ipynb`.
+
+### Single GPU evaluation:
 ```bash
 cd ~/vote/
 export PYTHONPATH="$HOME/LIBERO:$PYTHONPATH"

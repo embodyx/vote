@@ -34,7 +34,7 @@ class L1RegressionActionHead(nn.Module):
 
 class MLPResNetBlock(nn.Module):
     """One MLP ResNet block with a residual connection."""
-    def __init__(self, dim):
+    def __init__(self, dim, dropout=0.1):
         super().__init__()
         self.dim = dim
         self.ffn = nn.Sequential(  # feedforward network, similar to the ones in Transformers
@@ -43,29 +43,33 @@ class MLPResNetBlock(nn.Module):
             # nn.ReLU(),
             nn.SiLU(), 
         )
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         # x: (batch_size, hidden_dim)
         # We follow the module ordering of "Pre-Layer Normalization" feedforward networks in Transformers as
         # described here: https://arxiv.org/pdf/2002.04745.pdf
         identity = x
-        x = self.ffn(x)
-        x = x + identity
+        x_ffn = self.ffn(x)
+        x_dropped = self.dropout(x_ffn)
+        x = x_dropped + identity
         return x
 
 
 class MLPResNet(nn.Module):
     """MLP with residual connection blocks."""
-    def __init__(self, num_blocks, input_dim, hidden_dim, output_dim):
+    def __init__(self, num_blocks, input_dim, hidden_dim, output_dim, dropout=0.1):
         super().__init__()
         self.layer_norm1 = nn.LayerNorm(input_dim)
         self.fc1 = nn.Linear(input_dim, hidden_dim)
         # self.relu = nn.ReLU()
         self.relu = nn.SiLU()
+        self.dropout1 = nn.Dropout(dropout)
         self.mlp_resnet_blocks = nn.ModuleList()
         for _ in range(num_blocks):
-            self.mlp_resnet_blocks.append(MLPResNetBlock(dim=hidden_dim))
+            self.mlp_resnet_blocks.append(MLPResNetBlock(dim=hidden_dim, dropout=dropout))
         self.layer_norm2 = nn.LayerNorm(hidden_dim)
+        self.dropout2 = nn.Dropout(dropout)
         self.fc2 = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
@@ -73,9 +77,11 @@ class MLPResNet(nn.Module):
         x = self.layer_norm1(x)  # shape: (batch_size, input_dim)
         x = self.fc1(x)  # shape: (batch_size, hidden_dim)
         x = self.relu(x)  # shape: (batch_size, hidden_dim)
+        x = self.dropout1(x)  # Apply dropout after first activation
         for block in self.mlp_resnet_blocks:
             x = block(x)  # shape: (batch_size, hidden_dim)
         x = self.layer_norm2(x)  # shape: (batch_size, hidden_dim)
+        x = self.dropout2(x)  # Apply dropout before final layer
         x = self.fc2(x)  # shape: (batch_size, output_dim)
         return x
 
@@ -238,3 +244,71 @@ class DiffusionActionHead(nn.Module):
         # Get diffusion model's noise prediction.
         noise_pred = self.noise_predictor(rearranged_actions_hidden_states)
         return noise_pred
+
+class MLPResNetBlockV2(nn.Module):
+    def __init__(self, dim, expansion=4, dropout=0.1):
+        super().__init__()
+        self.ffn = nn.Sequential(
+            nn.LayerNorm(dim),
+            nn.Linear(dim, dim * expansion),
+            nn.SiLU(),
+            nn.Linear(dim * expansion, dim)
+        )
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        identity = x
+        x_ffn = self.ffn(x)
+        x_dropped = self.dropout(x_ffn)
+        x = x_dropped + identity
+        return x
+
+class L1RegressionActionHeadFunnel(nn.Module):
+    def __init__(self,
+                 input_dim: int,
+                 hidden_dim: int,
+                 action_dim: int,
+                 num_actions_chunk: int,
+                 num_actions_per_token: int,
+                 num_blocks: int,
+                 expansion: int = 4,
+                 dropout: float = 0.1):
+        super().__init__()
+        self.action_dim = action_dim
+        self.num_actions_chunk = num_actions_chunk
+        self.num_actions_per_token = num_actions_per_token
+
+        self.input_proj = nn.Sequential(
+            nn.LayerNorm(input_dim),
+            nn.Linear(input_dim, hidden_dim),
+            nn.SiLU(),
+        )
+
+        self.resnet_body = nn.ModuleList()
+        for _ in range(num_blocks):
+            self.resnet_body.append(
+                MLPResNetBlockV2(dim=hidden_dim, expansion=expansion, dropout=dropout)
+            )
+
+        self.output_head = nn.Sequential(
+            nn.LayerNorm(hidden_dim),
+            nn.Linear(hidden_dim, action_dim*num_actions_per_token)
+        )
+
+    def predict_action(self, actions_hidden_states: torch.Tensor):
+        """
+        Predict actions using funnel MLP design.
+        
+        Args:
+            actions_hidden_states: (batch_size, num_tokens, input_dim)
+        Returns:
+            action: (batch_size, num_actions_chunk, action_dim)
+        """
+        batch_size = actions_hidden_states.shape[0]
+        
+        x = self.input_proj(actions_hidden_states)
+        for block in self.resnet_body:
+            x = block(x)
+        action = self.output_head(x)  # (batch_size, num_tokens, action_dim*num_actions_per_token)
+        action = action.reshape(batch_size, self.num_actions_chunk, self.action_dim)
+        return action

@@ -533,11 +533,11 @@ def get_action_head(cfg: Any, llm_dim: int) -> torch.nn.Module:
     Returns:
         torch.nn.Module: The initialized action head
     """
-    if cfg.mode == "mul":
+    if cfg.action_head_name == "mlp":
         action_head = L1RegressionActionHeadmulmlpk(input_dim=llm_dim, hidden_dim=cfg.hidden_dim, action_dim=ACTION_DIM, num_actions_chunk=cfg.num_actions_chunk, num_actions_per_token=cfg.num_actions_per_token, num_blocks=cfg.num_blocks)
-    elif cfg.mode == "dit":
-        action_head = DiTActionHead(input_dim=llm_dim, action_dim=ACTION_DIM, num_actions_chunk=cfg.num_actions_chunk, num_actions_per_token=cfg.num_actions_per_token)
-    else:
+    elif cfg.action_head_name == "funnel":
+        action_head = L1RegressionActionHeadFunnel(input_dim=llm_dim,hidden_dim=llm_dim//4, action_dim=ACTION_DIM, num_actions_chunk=cfg.num_actions_chunk, num_actions_per_token=cfg.num_actions_per_token, num_blocks=cfg.num_blocks)
+    else:    
         raise ValueError("Invalid mode!")
 
     action_head = action_head.to(torch.bfloat16).to(DEVICE)

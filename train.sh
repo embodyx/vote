@@ -27,7 +27,7 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 --master_port 29508 vla-scri
   --num_actions_per_token 8 \
   --num_blocks 2 \
   --mode "mul" \
-  --action_head_name "mlp" 
+  --action_head_name "funnel" 
 
 
 # for bridge

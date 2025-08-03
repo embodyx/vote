@@ -131,10 +131,9 @@ Evaluation results on the WidowX robot in the SimplerEnv Visual Matching setting
 
 # TODO
 
-- [ ] Upload all LIBERO checkpoints  
+- [x] Upload all LIBERO checkpoints  
+- [x] Upload training scripts
 - [ ] Upload SimplerEnv evaluation code and checkpoints  
-- [ ] Upload training scripts
-
 
 
 ## Citation

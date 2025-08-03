@@ -6,8 +6,6 @@ from multiprocessing import Process
 from datetime import datetime
 import time
 
-os.environ['PYTHONPATH'] = "/home/user1/workspace/LIBERO:" + os.environ.get('PYTHONPATH', '')
-
 def run_libero_eval(ckpt_path, task_suite_name, gpu_id, log_base_dir="eval_logs"):
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     
@@ -35,6 +33,7 @@ def run_libero_eval(ckpt_path, task_suite_name, gpu_id, log_base_dir="eval_logs"
         "--num_actions_per_token", "8",
         "--num_blocks", "4",
         "--mode", "mul",
+        "--action_head_name", "funnel"
     ]
     
     log_file = os.path.join(log_dir, f"{name}.log")
@@ -121,12 +120,12 @@ def smart_schedule(ckpts, devices, task_suite, log_base_dir):
 
 def main():
     parser = argparse.ArgumentParser(description="LIBERO Evaluation with GPU Scheduling")
-    parser.add_argument("--parent_dir", type=str, 
-                       default="/home/luken/wandbrun/libero10fel4-b16+3rd_img+8act+8apt+lr0.0001/",
+    parser.add_argument("--dir", type=str, 
+                       default="/home/user1/workspace/libero_object_no_noops+b20+3rd_img+8act+8apt+lr0.0001/",
                        help="Parent directory containing checkpoint subdirectories")
-    parser.add_argument("--task_suite", type=str, default="libero_10",
+    parser.add_argument("--task_suite", type=str, default="libero_object",
                        help="Task suite name for evaluation")
-    parser.add_argument("--devices", type=int, nargs="+", default=[0,1,2,3],
+    parser.add_argument("--devices", type=int, nargs="+", default=[0,1,2,3,4,5,6,7],
                        help="GPU device IDs to use")
     parser.add_argument("--list_ckpts", action="store_true",
                        help="List all available checkpoints and exit")

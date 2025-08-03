@@ -63,9 +63,9 @@ class GenerateConfig:
     seed: int = 7                                    # Random Seed (for reproducibility)
     mode: str = "mul"
     num_actions_per_token: int = -999
-    action_head_name: str = "mlp"
+    action_head_name: str = "funnel"
     hidden_dim: int = 4096
-    num_blocks: int = 2
+    num_blocks: int = 4
     # fmt: on
 
 cfg = GenerateConfig(

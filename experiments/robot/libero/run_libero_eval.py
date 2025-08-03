@@ -132,8 +132,8 @@ class GenerateConfig:
     mode: str = "mul"
     num_actions_per_token: int = -999
     hidden_dim: int = 4096
-    num_blocks: int = 2
-    action_head_name: str = "mlp"
+    num_blocks: int = 4
+    action_head_name: str = "funnel"
     # fmt: on
 
 
