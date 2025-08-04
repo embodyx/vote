@@ -42,14 +42,12 @@ We have speed measurement codes under `experiments/speed/`.
 
 ## Training Setting
 
-- **LIBERO**: 5x NVIDIA RTX A6000 GPUs (48 GB VRAM each), 256 GB system RAM, shuffle buffer of 60K samples. Global batch size 40. Training converges in under 24 hours.
-- **Fractal**: 6x NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 144. Training converges in under 24 hours.
-- **Bridge**: 4x NVIDIA H100 NVL GPUs (94 GB VRAM each), 756 GB system RAM, shuffle buffer of 256K samples. Global batch size 96. Training converges in under 24 hours.
+Training runs on NVIDIA H100 NVL GPUs (94 GB VRAM each) with 756 GB RAM. We set a shuffle buffer of 256K samples.
 
 
 ## Steps
 
-Dataset follows: [rlds_dataset_mod](https://github.com/kpertsch/rlds_dataset_mod)
+BridgeDataV2 and Fractal are a part of Open X-Embodiment Dataset,  the preparation follows: [rlds_dataset_mod](https://github.com/kpertsch/rlds_dataset_mod)
 
 Then run train script:
 ```
@@ -126,8 +124,7 @@ Evaluation results on the WidowX robot in the SimplerEnv Visual Matching setting
 | Openpi0                 | 29.1      | 0.0        | 16.6         | 62.5          | 27.1 | 470            | 0.50        |
 | SpatialVLA | 16.7      | 25.0       | 29.2         | 100.0         | 42.7 | 400            | 0.60        |
 | CogACT                  | 71.7      | 50.8       | 15.0         | 67.5          | 51.3 | 220            | 1.09        |
-| __Ours__               | __54.2__  | __25.0__   | __45.8__     | __91.7__      | __54.2__ | __78__     | __3.07__    |
-
+| __Ours__               | __58.3__  | __29.2__   | __50.0__     | __95.8__      | __58.3__ | __78__     | __3.1__    |
 
 # TODO
 

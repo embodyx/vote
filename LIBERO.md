@@ -14,10 +14,14 @@ Evaluation
     * `robot_utils.py`: Other eval utils
 
 Training
-* `vla-scripts/finetune.py`: VLA fine-tuning script
+* `vla-scripts/train.py`: VLA train script
 
 
 ## Environment
+
+Requires 1 GPU with ~16 GB VRAM.
+
+Install LIBERO package.
 ```bash
 cd ~/ 
 git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
@@ -25,7 +29,7 @@ cd LIBERO
 pip install -e .
 ```
 
-then install libero requirement.
+then install related requirement.
 ```bash
 cd ~/vote
 pip install -r experiments/robot/libero/libero_requirements.txt 
@@ -70,3 +74,7 @@ Dataset
 ```
 git clone git@hf.co:datasets/openvla/modified_libero_rlds
 ```
+
+
+We fine-tune on OpenVLA model using AdamW with a learning rate of 1e-4. Fine-tuning employs LoRA with rank r = 32 and α = 16. By default, the model is finetuned to output one token $\texttt{<ACT>}$ with a chunk size of 8.
+

@@ -31,7 +31,7 @@ from experiments.robot.openvla_utils import (
 from prismatic.extern.hf.configuration_prismatic import OpenVLAConfig
 from prismatic.extern.hf.modeling_prismatic import OpenVLAForActionPrediction
 from prismatic.extern.hf.processing_prismatic import PrismaticImageProcessor, PrismaticProcessor
-from prismatic.models.action_heads import L1RegressionActionHeadmulmlpk
+from prismatic.models.action_heads import L1RegressionActionHeadmulmlpk, L1RegressionActionHeadFunnel
 from prismatic.models.backbones.llm.prompting import PurePromptBuilder
 from prismatic.models.projectors import (
     ProprioProjector,
@@ -107,8 +107,8 @@ class FinetuneConfig:
     wandb_log_freq: int = 10                         # WandB logging frequency in steps
 
     # effvla parameters
-    mode: str = None
-    action_head_name: str = None
+    mode: str = "mul"
+    action_head_name: str = "funnel"
     num_actions_chunk: int = -1
     num_actions_per_token: int = -1
     num_blocks: int = -1
@@ -661,7 +661,9 @@ def finetune(cfg: FinetuneConfig) -> None:
 
         if cfg.action_head_name == "mlp":
             action_head = L1RegressionActionHeadmulmlpk(input_dim=llm_dim, hidden_dim=llm_dim, action_dim=ACTION_DIM, num_actions_chunk=cfg.num_actions_chunk, num_actions_per_token=cfg.num_actions_per_token, num_blocks=cfg.num_blocks)
-            
+        elif cfg.action_head_name == "funnel":
+            action_head = L1RegressionActionHeadFunnel(input_dim=llm_dim,hidden_dim=llm_dim//4, action_dim=ACTION_DIM, num_actions_chunk=cfg.num_actions_chunk, num_actions_per_token=cfg.num_actions_per_token, num_blocks=cfg.num_blocks)
+
         checkpoint_path = find_checkpoint_file(cfg.pretrained_checkpoint, "action_head")
         state_dict = load_component_state_dict(checkpoint_path)
         action_head.load_state_dict(state_dict)
@@ -746,7 +748,15 @@ def finetune(cfg: FinetuneConfig) -> None:
             {"input_dim": vla.module.llm_dim, "hidden_dim": vla.module.llm_dim, "action_dim": ACTION_DIM, "num_actions_chunk": cfg.num_actions_chunk, "num_actions_per_token": cfg.num_actions_per_token, "num_blocks": cfg.num_blocks},
             to_bf16=True,
             )
-
+        elif cfg.action_head_name == "funnel":
+            action_head = init_module(
+                L1RegressionActionHeadFunnel,
+                "action_head",
+                cfg,
+                device_id,
+                {"input_dim": vla.module.llm_dim, "hidden_dim": vla.module.llm_dim//4, "action_dim": ACTION_DIM, "num_actions_chunk": cfg.num_actions_chunk, "num_actions_per_token": cfg.num_actions_per_token, "num_blocks": cfg.num_blocks},
+                to_bf16=True,
+            )
 
     # Get number of vision patches
     NUM_PATCHES = vla.module.vision_backbone.get_num_patches() * vla.module.vision_backbone.get_num_images_in_input()
