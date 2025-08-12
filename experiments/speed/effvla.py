@@ -68,8 +68,31 @@ class GenerateConfig:
     num_blocks: int = 4
     # fmt: on
 
+
+# one token
+# cfg = GenerateConfig(
+#     pretrained_checkpoint="juyil/libero_object-b8-3rd_person_img-8act-mul",
+#     use_l1_regression=True,
+#     use_diffusion=False,
+#     use_film=False,
+#     num_images_in_input=1,
+#     use_proprio=False,
+#     load_in_8bit=False,
+#     load_in_4bit=False,
+#     center_crop=True,
+#     num_open_loop_steps=8,
+#     unnorm_key="libero_object_no_noops",
+#     mode="mul",
+#     num_actions_chunk=8,
+#     num_actions_per_token=8,
+#     action_head_name="mlp",
+#     num_blocks=2,
+# )
+
+
+# two tokens
 cfg = GenerateConfig(
-    pretrained_checkpoint="juyil/libero_object-b8-3rd_person_img-8act-mul",
+    pretrained_checkpoint="juyil/spatial-b8-16act-2token-60ksteps",
     use_l1_regression=True,
     use_diffusion=False,
     use_film=False,
@@ -79,10 +102,12 @@ cfg = GenerateConfig(
     load_in_4bit=False,
     center_crop=True,
     num_open_loop_steps=8,
-    unnorm_key="libero_object_no_noops",
+    unnorm_key="libero_spatial_no_noops",
     mode="mul",
-    num_actions_chunk=8,
+    num_actions_chunk=16,
     num_actions_per_token=8,
+    action_head_name="mlp",
+    num_blocks=2,
 )
 
 vla :OpenVLAForActionPrediction = get_model(cfg).to("cuda:0").eval()

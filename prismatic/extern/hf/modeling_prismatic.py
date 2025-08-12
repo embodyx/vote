@@ -20,7 +20,7 @@ import transformers
 from timm.models.vision_transformer import LayerScale
 from transformers import AutoModelForCausalLM, PretrainedConfig, PreTrainedModel
 from transformers.modeling_outputs import ModelOutput
-from prismatic.models.action_heads import  L1RegressionActionHead, DiTActionHead, FlowMatchingActionHead
+from prismatic.models.action_heads import  L1RegressionActionHead
 from prismatic.training.train_utils import (
     get_current_action_mask,
     get_next_actions_mask,

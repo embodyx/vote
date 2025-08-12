@@ -25,7 +25,7 @@ json_numpy.patch()
 from prismatic.extern.hf.configuration_prismatic import OpenVLAConfig
 from prismatic.extern.hf.modeling_prismatic import OpenVLAForActionPrediction
 from prismatic.extern.hf.processing_prismatic import PrismaticImageProcessor, PrismaticProcessor
-from prismatic.models.action_heads import L1RegressionActionHeadmulmlpk, ViTActionHead, DiTActionHead, L1RegressionActionHeadFunnel
+from prismatic.models.action_heads import L1RegressionActionHeadmulmlpk, L1RegressionActionHeadFunnel
 from prismatic.models.film_vit_wrapper import FiLMedPrismaticVisionBackbone
 from prismatic.models.projectors import NoisyActionProjector, ProprioProjector
 from prismatic.vla.constants import (
@@ -548,6 +548,7 @@ def get_action_head(cfg: Any, llm_dim: int) -> torch.nn.Module:
         model_path_to_action_head_name = {
             "juyil/libero_object-b8-3rd_person_img-8act-mul":"action_head--latest_checkpoint.pt",
             "juyil/libero_10-b24-3rd_person_img-16act-mlp4-60ksteps":"action_head--latest_checkpoint.pt",
+            "juyil/spatial-b8-16act-2token-60ksteps":"action_head--latest_checkpoint.pt",
         }
         if cfg.pretrained_checkpoint not in model_path_to_action_head_name.keys():
             raise ValueError("Unsupported HF Hub pretrained checkpoint found!")

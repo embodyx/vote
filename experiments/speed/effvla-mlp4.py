@@ -21,9 +21,12 @@ cfg = GenerateConfig(
     center_crop=True,
     num_open_loop_steps=16,
     unnorm_key="libero_10_no_noops",
-    mode="mlp4",
+    mode="mul",
     num_actions_chunk=16,
     num_actions_per_token=16,
+    action_head_name="mlp",
+    hidden_dim=4096,
+    num_blocks=4,
 )
 
 vla = get_model(cfg).to("cuda:0").eval()
