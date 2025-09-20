@@ -2,11 +2,10 @@
 
 **Paper: https://arxiv.org/abs/2507.05116**
 
-
  [\[🤗 Model Zoo\]](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf) 
 
 ## News 
-- `2025/07/10`: We release the [Vote 1.0](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf).
+- `2025/07/10`: We release the [Vote 1.0](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf). No need to handle **complex tokenizer** — migrate to a new VLM with just **2 lines of code**!
 
 
 # Installation
