@@ -169,12 +169,14 @@ def initialize_model(cfg: GenerateConfig):
             proprio_dim=8,  # 8-dimensional proprio for LIBERO,原来是写死的, 不适合别的. 
         )
 
-    action_head: L1RegressionActionHead = get_action_head(cfg, model.llm_dim)
+    action_head = get_action_head(cfg, model.llm_dim)
 
     # Get OpenVLA processor if needed
     processor = None
     if cfg.model_family == "openvla":
         processor = get_processor(cfg)
+        print(processor)
+        import ipdb; ipdb.set_trace()
         check_unnorm_key(cfg, model)
 
     if cfg.mode == "mul":

@@ -335,9 +335,8 @@ def get_lora_model(cfg: Any) -> torch.nn.Module:
     print("get_lora_model ...")
     # Merge LoRA weights into base model and save resulting model checkpoint
     # Note: Can be very slow on some devices; if so, we recommend merging offline
-    if not model_is_on_hf_hub(cfg.pretrained_checkpoint):
-
-        # Register OpenVLA model to HF Auto Classes (not needed if the model is on HF Hub)
+    # if not model_is_on_hf_hub(cfg.pretrained_checkpoint):
+    if True:
         AutoConfig.register("openvla", OpenVLAConfig)
         AutoImageProcessor.register(OpenVLAConfig, PrismaticImageProcessor)
         AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
@@ -535,7 +534,7 @@ def get_action_head(cfg: Any, llm_dim: int) -> torch.nn.Module:
     """
     if cfg.action_head_name == "mlp":
         action_head = L1RegressionActionHeadmulmlpk(input_dim=llm_dim, hidden_dim=cfg.hidden_dim, action_dim=ACTION_DIM, num_actions_chunk=cfg.num_actions_chunk, num_actions_per_token=cfg.num_actions_per_token, num_blocks=cfg.num_blocks)
-    elif cfg.action_head_name == "funnel":
+    elif cfg.action_head_name == "fel":
         action_head = L1RegressionActionHeadFunnel(input_dim=llm_dim,hidden_dim=llm_dim//4, action_dim=ACTION_DIM, num_actions_chunk=cfg.num_actions_chunk, num_actions_per_token=cfg.num_actions_per_token, num_blocks=cfg.num_blocks)
     else:    
         raise ValueError("Invalid mode!")
@@ -549,6 +548,7 @@ def get_action_head(cfg: Any, llm_dim: int) -> torch.nn.Module:
             "juyil/libero_object-b8-3rd_person_img-8act-mul":"action_head--latest_checkpoint.pt",
             "juyil/libero_10-b24-3rd_person_img-16act-mlp4-60ksteps":"action_head--latest_checkpoint.pt",
             "juyil/spatial-b8-16act-2token-60ksteps":"action_head--latest_checkpoint.pt",
+            "juyil/llama3.2-1B-spatial":"action_head--35000_checkpoint.pt",
         }
         if cfg.pretrained_checkpoint not in model_path_to_action_head_name.keys():
             raise ValueError("Unsupported HF Hub pretrained checkpoint found!")

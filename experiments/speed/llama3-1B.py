@@ -11,8 +11,8 @@ from PIL import Image
 import numpy as np
 from prismatic.extern.hf.modeling_prismatic import OpenVLAForActionPrediction
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 @dataclass
@@ -63,13 +63,16 @@ class GenerateConfig:
     seed: int = 7                                    # Random Seed (for reproducibility)
     mode: str = "mul"
     num_actions_per_token: int = -999
-    action_head_name: str = "mlp"
+    action_head_name: str = "funnel"
     hidden_dim: int = 4096
     num_blocks: int = 4
+    model_type: str = "llama3.2"
     # fmt: on
 
+
 cfg = GenerateConfig(
-    pretrained_checkpoint="juyil/libero_10-b24-3rd_person_img-16act-mlp4-60ksteps",
+    base_vla_path="juyil/llama3.2-1B-VLM",
+    pretrained_checkpoint="juyil/llama3.2-1B-spatial",
     use_l1_regression=True,
     use_diffusion=False,
     use_film=False,
@@ -78,32 +81,24 @@ cfg = GenerateConfig(
     load_in_8bit=False,
     load_in_4bit=False,
     center_crop=True,
-    num_open_loop_steps=16,
-    unnorm_key="libero_10_no_noops",
+    num_open_loop_steps=8,
+    unnorm_key="libero_spatial_no_noops",
     mode="mul",
-    num_actions_chunk=16,
-    num_actions_per_token=16,
-    action_head_name="mlp",
-    hidden_dim=4096,
+    num_actions_chunk=8,
+    num_actions_per_token=8,
+    action_head_name="fel",
     num_blocks=4,
+    model_type="llama3.2",
+    hidden_dim=2048,
 )
 
-vla = get_model(cfg).to("cuda:0").eval()
+vla :OpenVLAForActionPrediction = get_model(cfg).to("cuda:0").eval()
 action_head = get_action_head(cfg, llm_dim=vla.llm_dim)
 processor = get_processor(cfg)
 vla.predict_action = vla.mul_predict_action
-
 image = Image.open("example.png").convert("RGB")
-prompt = "In: What action should the robot take to {<INSTRUCTION>}?\nOut:"
-inputs = processor(prompt, image).to("cuda:0", dtype=torch.bfloat16)
-
-# with open("./sample_libero_spatial_observation.pkl", "rb") as file:
-#     observation = pickle.load(file)
-img_np = np.array(image)
-observation = {
-    "full_image": img_np,
-    "task_description": "pick the cup",
-}
+prompt = "In: What action should the robot take to pick the cup?\nOut:"
+inputs = processor(text=prompt,images=image).to("cuda:0", dtype=torch.bfloat16)
 
 for _ in range(5):
     actions, _ = vla.predict_action(

@@ -54,6 +54,7 @@ LLM_BACKBONE_TO_HF_PATH = {
     "mistral-v0.1-7b-instruct": "mistralai/Mistral-7B-Instruct-v0.1",
 
     "phi-2-3b": "microsoft/phi-2",
+    "llama3.2-1b-pure": "meta-llama/Llama-3.2-1B",
 }
 LLM_BACKBONE_TO_HF_METACLASS = {
     "llama2-7b-pure": "llama", "llama2-13b-pure": "llama", "llama2-7b-chat": "llama", "llama2-13b-chat": "llama",
@@ -62,6 +63,7 @@ LLM_BACKBONE_TO_HF_METACLASS = {
     "mistral-v0.1-7b-pure": "mistral", "mistral-v0.1-7b-instruct": "mistral",
 
     "phi-2-3b": "phi",
+    "llama3.2-1b-pure": "llama",
 }
 
 VALID_VISION_BACKBONES = set(VISION_BACKBONE_TO_RESOLUTION.keys())

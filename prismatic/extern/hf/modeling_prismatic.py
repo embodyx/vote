@@ -20,7 +20,6 @@ import transformers
 from timm.models.vision_transformer import LayerScale
 from transformers import AutoModelForCausalLM, PretrainedConfig, PreTrainedModel
 from transformers.modeling_outputs import ModelOutput
-from prismatic.models.action_heads import  L1RegressionActionHead
 from prismatic.training.train_utils import (
     get_current_action_mask,
     get_next_actions_mask,
@@ -715,6 +714,7 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
 
 
 class OpenVLAForActionPrediction(PrismaticForConditionalGeneration):
+    _supports_sdpa = False# for transformers 4.55 adhoc fix  AttributeError: 'OpenVLAForActionPrediction' object has no attribute '_supports_sdpa'
     config_class: PretrainedConfig = OpenVLAConfig
 
     def __init__(self, config: OpenVLAConfig) -> None:
@@ -881,7 +881,7 @@ class OpenVLAForActionPrediction(PrismaticForConditionalGeneration):
         labels: torch.LongTensor,
         NUM_PATCHES: int,
         NUM_PROMPT_TOKENS: int,
-        action_head: L1RegressionActionHead,
+        action_head,
         **kwargs,
     ):
         """Run L1 regression-based continuous action prediction or discrete action tokens prediction."""
@@ -939,7 +939,7 @@ class OpenVLAForActionPrediction(PrismaticForConditionalGeneration):
         labels: torch.LongTensor,
         NUM_PATCHES: int,
         NUM_PROMPT_TOKENS: int,
-        action_head: L1RegressionActionHead,
+        action_head,
         **kwargs,
     ):
         cfg = kwargs.get("cfg", None) 
@@ -1235,7 +1235,7 @@ class OpenVLAForActionPrediction(PrismaticForConditionalGeneration):
         unnorm_key: Optional[str] = None,
         proprio=None,
         proprio_projector=None,
-        action_head:L1RegressionActionHead=None,
+        action_head=None,
         noisy_action_projector=None,
         use_film: bool = False,
         **kwargs: str,
@@ -1288,18 +1288,22 @@ class OpenVLAForActionPrediction(PrismaticForConditionalGeneration):
         unnorm_key: Optional[str] = None,
         proprio=None,
         proprio_projector=None,
-        action_head:L1RegressionActionHead=None,
+        action_head=None,
         noisy_action_projector=None,
         use_film: bool = False,
         **kwargs: str,
     ) -> np.ndarray:
         cfg = kwargs.get("cfg", None)  # Extract cfg from kwargs
 
-        if not torch.all(input_ids[:, -1] == 29871):
-            input_ids = torch.cat(
-                (input_ids, torch.unsqueeze(torch.Tensor([29871]).long(), dim=0).to(input_ids.device)), dim=1
-            )
+        if cfg.model_type == "llama3.2":
+            emptytoken = 220 # for llama3.2
+        else:
+            emptytoken = 29871 # for llama2
 
+        if not torch.all(input_ids[:, -1] == emptytoken):
+            input_ids = torch.cat(
+                (input_ids, torch.unsqueeze(torch.Tensor([emptytoken]).long(), dim=0).to(input_ids.device)), dim=1
+            )
         
         pixel_values = kwargs["pixel_values"]
         attention_mask = kwargs["attention_mask"]
