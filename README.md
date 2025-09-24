@@ -5,6 +5,7 @@
  [\[🤗 Model Zoo\]](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf) 
 
 ## News 
+- `2025/09/22`: We release the VOTE llama3.2-1B-VLA model. https://github.com/LukeLIN-web/vote/blob/main/experiments/speed/llama3-1B.py 
 - `2025/07/10`: We release the [Vote 1.0](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf). No need to handle **complex tokenizer** — migrate to a new VLM with just **2 lines of code**!
 
 
@@ -36,6 +37,43 @@ python effvla.py
 ### Speed
 
 We have speed measurement codes under `experiments/speed/`. 
+
+## Installation on AGX Orin
+
+```bash
+python -m venv orin
+source orin/bin/activate
+
+# Install transformers and other dependencies
+pip3 install packaging ninja transformers==4.40.1 tokenizers==0.19.1 timm==0.9.10 diffusers==0.30.0
+
+# Install Tensorflow 2.15.0
+pip3 install tensorflow==2.15.0
+
+# Install Tensorflow's addons from source
+git clone https://github.com/tensorflow/addons
+cd addons
+pip3 install -e .
+
+# Clone QwenVLA repo and pip install to download dependencies
+git clone https://github.com/LukeLIN-web/vote.git vote
+cd vote
+pip3 install -e .
+cd ..
+# This step will install the wrong versions of torch, torchvision that would not work on Jetson machine.
+# We need to install the precompiled wheels for Jetson
+
+# Install torch, torchvision, torchaudio using Nvidia's precompiled wheels for Jetson. 
+# torch: https://nvidia.box.com/shared/static/mp164asf3sceb570wvjsrezk1p4ftj8t.whl
+# torchvision: https://nvidia.box.com/shared/static/xpr06qe6ql3l6rj22cu3c45tz1wzi36p.whl
+pip3 install torch*.whl torchvision*.whl
+
+# This step will output dependency error as followed, ignore them.
+# ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is 
+# the source of the following dependency conflicts.
+# effvla 0.0.1 requires torchvision==0.18.1, but you have torchvision 0.18.0a0+6043bc2 which is incompatible.
+```
+
 
 # Training
 
@@ -125,11 +163,13 @@ Evaluation results on the WidowX robot in the SimplerEnv Visual Matching setting
 | CogACT                  | 71.7      | 50.8       | 15.0         | 67.5          | 51.3 | 220            | 1.09        |
 | __Ours__               | __58.3__  | __29.2__   | __50.0__     | __95.8__      | __58.3__ | __78__     | __3.1__    |
 
-# TODO
 
-- [x] Upload all LIBERO checkpoints  
-- [x] Upload training scripts
-- [ ] Upload SimplerEnv evaluation code and checkpoints  
+
+LLAMA3.2-1B-VLA
+
+| Model          | Parameters (B) | libero_spatial SR (%) | libero_object SR (%) | libero_goal SR (%) | libero_10 SR (%) | Average (SR%)  | VRAM(GB) |
+|----------------|----------------|------------------------------|-----------------------------|---------------------------|-------------------------|---------|------|
+| LLAMA3.2-1B-VLA| 2.3            | 98.4                        |      96                       |         95%                  |            82.4%             |   92.95%      | 4.34  |
 
 
 ## Citation
