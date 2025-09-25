@@ -6,6 +6,10 @@ from multiprocessing import Process
 from datetime import datetime
 import time
 
+predefined_ckpts = [
+    "juyil/llama3.2-1B-spatial",
+]
+
 def run_libero_eval(ckpt_path, task_suite_name, gpu_id, log_base_dir="eval_logs"):
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     
@@ -20,7 +24,9 @@ def run_libero_eval(ckpt_path, task_suite_name, gpu_id, log_base_dir="eval_logs"
     print("=" * 70)
     
     cmd = [
-        "python", "experiments/robot/libero/run_libero_eval.py",
+        "python", "run_libero_eval.py",
+        "--model_family", "openvla",
+        "--base_vla_path", "juyil/prismatic-llama3.2-dinosiglip-224px-1b-vlm",
         "--pretrained_checkpoint", str(ckpt_path),
         "--task_suite_name", task_suite_name,
         "--center_crop", "True",
@@ -32,8 +38,9 @@ def run_libero_eval(ckpt_path, task_suite_name, gpu_id, log_base_dir="eval_logs"
         "--num_actions_chunk", "8",
         "--num_actions_per_token", "8",
         "--num_blocks", "4",
+        "--hidden_dim", "2048",
         "--mode", "mul",
-        "--action_head_name", "funnel"
+        "--action_head_name", "fel"
     ]
     
     log_file = os.path.join(log_dir, f"{name}.log")
@@ -121,37 +128,34 @@ def smart_schedule(ckpts, devices, task_suite, log_base_dir):
 def main():
     parser = argparse.ArgumentParser(description="LIBERO Evaluation with GPU Scheduling")
     parser.add_argument("--dir", type=str, 
-                       default="/home/user1/workspace/libero_object_no_noops+b20+3rd_img+8act+8apt+lr0.0001/",
+                       default="juyil/llama3.2-1B-spatial",
                        help="Parent directory containing checkpoint subdirectories")
-    parser.add_argument("--task_suite", type=str, default="libero_object",
+    parser.add_argument("--task_suite", type=str, default="libero_spatial",
                        help="Task suite name for evaluation")
     parser.add_argument("--devices", type=int, nargs="+", default=[0,1,2,3,4,5,6,7],
                        help="GPU device IDs to use")
-    parser.add_argument("--list_ckpts", action="store_true",
+    parser.add_argument("--hf_ckpts", action="store_true",
                        help="List all available checkpoints and exit")
     parser.add_argument("--log_dir", type=str, default="eval_logs",
                        help="Directory to save evaluation logs")
     
     args = parser.parse_args()
     
-    ckpts = get_checkpoint_dirs(args.parent_dir)
-    
-    if args.list_ckpts:
-        print("Available checkpoints:")
-        for i, ckpt in enumerate(ckpts):
-            print(f"{i+1}. {ckpt}")
-        return
-    
-    if not ckpts:
-        print("No valid checkpoints found.")
-        return
+    if args.hf_ckpts:
+        ckpts = predefined_ckpts
+    else:
+        ckpts = get_checkpoint_dirs(args.dir)
+        if not ckpts:
+            print("No valid checkpoints found.")
+            return
+
     
     print(f"Task Suite: {args.task_suite}")
     print(f"Devices: {args.devices}")
     print(f"Checkpoints: {len(ckpts)}")
-    print(f"Parent Directory: {args.parent_dir}")
+    print(f"Parent Directory: {args.dir}")
     print(f"Log Directory: {args.log_dir}")
-    print("-" * 50)
+    print("-" * 50) 
     
     t0 = datetime.now()
     

@@ -1,73 +1,14 @@
 import os
 import time
-import pickle
 import torch
-from dataclasses import dataclass
-from typing import Optional, Union
-from pathlib import Path
-from experiments.robot.openvla_utils import get_action_head, get_processor
+from experiments.robot.openvla_utils import get_action_head, get_processor,GenerateConfig
 from experiments.robot.robot_utils import get_model
 from PIL import Image
-import numpy as np
 from prismatic.extern.hf.modeling_prismatic import OpenVLAForActionPrediction
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-
-@dataclass
-class GenerateConfig:
-    # fmt: off
-
-    #################################################################################################################
-    # Model-specific parameters
-    #################################################################################################################
-    model_family: str = "openvla"                    # Model family
-    pretrained_checkpoint: Union[str, Path] = ""     # Pretrained checkpoint path
-    base_vla_path: str = "openvla/openvla-7b"             # Path to OpenVLA model (on HuggingFace Hub or stored locally)
-
-    use_l1_regression: bool = True                   # If True, uses continuous action head with L1 regression objective
-    use_diffusion: bool = False                      # If True, uses continuous action head with diffusion modeling objective (DDIM)
-    num_diffusion_steps: int = 50                    # (When `diffusion==True`) Number of diffusion steps for inference
-    use_film: bool = False                           # If True, uses FiLM to infuse language inputs into visual features
-    num_images_in_input: int = 2                     # Number of images in the VLA input (default: 1)
-    use_proprio: bool = True                         # Whether to include proprio state in input
-
-    center_crop: bool = True                         # Center crop? (if trained w/ random crop image aug)
-    num_actions_chunk: int = -999
-    num_open_loop_steps: int = -999    # Number of actions to execute open-loop before requerying policy
-
-    unnorm_key: Union[str, Path] = ""                # Action un-normalization key
-
-    load_in_8bit: bool = False                       # (For OpenVLA only) Load with 8-bit quantization
-    load_in_4bit: bool = False                       # (For OpenVLA only) Load with 4-bit quantization
-
-    #################################################################################################################
-    # LIBERO environment-specific parameters
-    #################################################################################################################
-    num_steps_wait: int = 10                         # Number of steps to wait for objects to stabilize in sim
-    num_trials_per_task: int = 50                    # Number of rollouts per task
-    initial_states_path: str = "DEFAULT"             # "DEFAULT", or path to initial states JSON file
-    env_img_res: int = 256                           # Resolution for environment images (not policy input resolution)
-
-    #################################################################################################################
-    # Utils
-    #################################################################################################################
-    run_id_note: Optional[str] = None                # Extra note to add to end of run ID for logging
-    local_log_dir: str = "./experiments/logs"        # Local directory for eval logs
-
-    use_wandb: bool = False                          # Whether to also log results in Weights & Biases
-    wandb_entity: str = "your-wandb-entity"          # Name of WandB entity
-    wandb_project: str = "your-wandb-project"        # Name of WandB project
-
-    seed: int = 7                                    # Random Seed (for reproducibility)
-    mode: str = "mul"
-    num_actions_per_token: int = -999
-    action_head_name: str = "funnel"
-    hidden_dim: int = 4096
-    num_blocks: int = 4
-    model_type: str = "llama3.2"
-    # fmt: on
 
 
 cfg = GenerateConfig(
