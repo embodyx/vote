@@ -45,7 +45,7 @@ python -m venv orin
 source orin/bin/activate
 
 # Install transformers and other dependencies
-pip3 install packaging ninja transformers==4.40.1 tokenizers==0.19.1 timm==0.9.10 diffusers==0.30.0
+pip3 install packaging ninja transformers==4.51.0 tokenizers==0.21.4 timm==0.9.10 diffusers==0.32.2
 
 # Install Tensorflow 2.15.0
 pip3 install tensorflow==2.15.0

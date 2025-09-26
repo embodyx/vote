@@ -34,7 +34,7 @@ pip install -e .
 ## Evaluation
 
 ```bash
-python batch_eval.py --hf_ckpts
+python experiments/robot/libero/batch_eval.py  --hf_ckpts
 ```
 When you have multiple checkpoints, the results could be plotted with `batch_plot.ipynb`.
 
