@@ -1,12 +1,12 @@
-# VOTE: Vision-Language-Action Optimization with Trajectory Ensemble Voting
+# VOTE: Vision-Language-Action Optimization with Trajectory Ensemble Voting 🚀🤖
 
-**Paper: https://arxiv.org/abs/2507.05116**
+**📄 Paper:** https://arxiv.org/abs/2507.05116  
 
  [\[🤗 Model Zoo\]](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf) 
 
 ## News 
-- `2025/09/22`: We release the VOTE llama3.2-1B-VLA model. https://github.com/LukeLIN-web/vote/blob/main/experiments/speed/llama3-1B.py 
-- `2025/07/10`: We release the [Vote 1.0](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf). No need to handle **complex tokenizer** — migrate to a new VLM with just **2 lines of code**!
+- `2025/09/22` ✨ Released **VOTE llama3.2-1B-VLA** model 👉  👉 [script](https://github.com/LukeLIN-web/vote/blob/main/experiments/speed/llama3-1B.py)  
+- `2025/07/10`: 🎉 We release the [Vote 1.0](https://huggingface.co/collections/juyil/vote-vision-language-action-model-686f5dac2775080477a86cdf).  ➡️ No need for **complex tokenizers** — migrate to a new VLM with just **2 lines of code** ⚡️  
 
 
 # Installation
@@ -171,6 +171,7 @@ LLAMA3.2-1B-VLA
 |----------------|----------------|------------------------------|-----------------------------|---------------------------|-------------------------|---------|------|
 | LLAMA3.2-1B-VLA| 2.3            | 98.4                        |      96                       |         95%                  |            82.4%             |   92.95%      | 4.34  |
 
+The accuracy curve is shown here: https://www.notion.so/How-much-data-need-for-small-VLA-fitting-2796566ea37a80ec8334d65fe0d365cd?source=copy_link
 
 ## Citation
 
