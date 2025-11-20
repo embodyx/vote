@@ -1,5 +1,3 @@
-from tkinter import Tk, filedialog
-
 import os
 import time
 import torch
@@ -7,6 +5,7 @@ from experiments.robot.openvla_utils import get_action_head, get_processor,Gener
 from experiments.robot.robot_utils import get_model
 from PIL import Image
 from prismatic.extern.hf.modeling_prismatic import OpenVLAForActionPrediction
+import sys
 
 MAX_TRIAL = 10
 
@@ -39,17 +38,14 @@ action_head = get_action_head(cfg, llm_dim=vla.llm_dim)
 processor = get_processor(cfg)
 vla.predict_action = vla.mul_predict_action
 
+# If no image is provided, use the default one, else, use the provided image
+if len(sys.argv) < 2:
+    file_path = './example.png'
+else:
+    file_path = sys.argv[1]
 
 for _ in range(MAX_TRIAL):
-    # Select an image
-    root = Tk()
-    root.withdraw()
-
-    file_path = filedialog.askopenfilename(
-        title="Select a PNG image",
-        filetypes=[("PNG files", "*.png")]
-    )
-
+    # Load the image
     if file_path:
         image = Image.open(file_path).convert("RGB")
         image.show()  # <- this opens the image in your default viewer
@@ -58,7 +54,7 @@ for _ in range(MAX_TRIAL):
 
     # Input the task
     task = input("Please enter the task: ")
-    print("You typed:", task)
+    print("The task is:", task)
 
     prompt = "In: What action should the robot take to" + task + "?\nOut:"
     inputs = processor(text=prompt,images=image).to("cuda:0", dtype=torch.bfloat16)
